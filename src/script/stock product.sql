@@ -1,4 +1,4 @@
-CREATE TABLE tb_product (
+CREATE TABLE  if not exists tb_product (
                             id SERIAL PRIMARY KEY,
                             name VARCHAR(100) UNIQUE NOT NULL,
                             unit_price DOUBLE PRECISION NOT NULL CHECK (unit_price >= 0),
@@ -17,5 +17,8 @@ VALUES ('Computer', 350, 4),
        ('HDMI', 11, 7),
        ('Printer', 9, 82),
        ('Phone Case', 17, 17);
+
+create table if not exists tb_set_row (row int);
+insert into tb_set_row values (1);
 
 TRUNCATE TABLE tb_product RESTART IDENTITY;

@@ -1,6 +1,11 @@
 package main;
 
+import main.service.ProductImpl;
+
+
 import java.util.Scanner;
+
+import static main.service.Validate.*;
 
 public class Main {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -9,8 +14,9 @@ public class Main {
 
     public static void main(String[] args) {
 
+
         boolean isValid = false;
-        System.out.println("\t\t\t\t\t------------ Menu ------------");
+        table("Main");
         String option;
         Scanner sc = new Scanner(System.in);
         while (!isValid) {

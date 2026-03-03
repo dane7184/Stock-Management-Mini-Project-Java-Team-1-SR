@@ -15,6 +15,7 @@ public class Main {
         proImlp.getRow();
         proImlp.getTotal();
 
+        ProductImpl productImpl = new ProductImpl();
 
         boolean isValid = false;
         System.out.println("\t\t\t\t\t------------ Menu ------------");
@@ -38,7 +39,7 @@ public class Main {
                 case "D" -> proImlp.deleteProduct();
                 case "S" -> proImlp.searchProductByName();
                 case "SE" -> proImlp.setRow(onlyDigit("Row Number"));
-                case "SA" -> System.out.println("Save");
+                case "SA" -> productImpl.saveAndUpdateProductToDb();
                 case "UN" -> System.out.println("Unsave");
                 case "RE" -> System.out.println("Restore");
                 case "E" ->{

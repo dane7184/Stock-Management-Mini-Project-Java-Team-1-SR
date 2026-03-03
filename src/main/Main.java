@@ -13,8 +13,6 @@ public class Main {
     public static final String ANSI_RED = "\u001B[31m";
 
     public static void main(String[] args) {
-
-
         boolean isValid = false;
         table("Main");
         String option;
@@ -51,7 +49,9 @@ public class Main {
                 case "W" -> System.out.println("Write");
                 case "R" -> System.out.println("Read");
                 case "U" -> System.out.println("Update");
-                case "D" -> System.out.println("Restore");
+                case "D" -> {
+                    ProductImpl.deleteProduct();
+                }
                 case "S" -> System.out.println("Search (Name)");
                 case "Se" -> System.out.println("Set Row");
                 case "Sa" -> System.out.println("Save");

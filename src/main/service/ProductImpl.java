@@ -101,13 +101,38 @@ public class ProductImpl implements ProductServer {
         String name = scanner.nextLine();
 
         System.out.print("Enter product Price: ");
-        double price = scanner.nextDouble();
+        double price;
+        while (true) {
+            System.out.print("Enter product Price: ");
+            if (scanner.hasNextDouble()) {
+                price = scanner.nextDouble();
+                if (price < 0) {
+                    System.out.println("Price cannot be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter a number.");
+                scanner.next();
+            }
+        }
 
         System.out.print("Enter product Quantity: ");
-        if (!scanner.hasNextInt()){
-            System.out.println("Invalid input");
+        int quantity;
+        while (true) {
+            System.out.print("Enter product Quantity: ");
+            if (scanner.hasNextInt()) {
+                quantity = scanner.nextInt();
+                if (quantity < 0) {
+                    System.out.println("Quantity can not be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter an integer.");
+                scanner.next();
+            }
         }
-        int quantity = scanner.nextInt();
 
         Date date = new Date();
 
@@ -150,13 +175,16 @@ public class ProductImpl implements ProductServer {
     @Override
     public void saveAndUpdateProductToDb() {
         System.out.println("UI for Update Insert To Database And UU Update date to database");
-        boolean isValid = true;
         Scanner scanner = new Scanner(System.in);
+        boolean isRunning = true;
 
-        do {
-            System.out.print("Enter product option: ");
+        while (isRunning) {
+            System.out.println("UI  : Insert Unsaved To Database");
+            System.out.println("UU  : Update Product In Database");
+            System.out.println("E   : Exit");
+            System.out.print("\nEnter product option: ");
             String option = scanner.nextLine().trim().toUpperCase();
-            switch (option){
+            switch (option) {
                 case "UI" -> {
                     showUnsavedProducts();
 
@@ -174,9 +202,18 @@ public class ProductImpl implements ProductServer {
                         System.out.println("Products were not saved.");
                     }
                 }
-                case "E" -> isValid = false;
+
+                case "UU" -> {
+                    System.out.println("Update feature coming soon...");
+                }
+
+                case "E" -> {
+                    isRunning = false;
+                    System.out.println("Exit Save/Update Menu.");
+                }
+
                 default -> System.out.println("Invalid option!");
             }
-        } while (!isValid);
+        }
     }
 }

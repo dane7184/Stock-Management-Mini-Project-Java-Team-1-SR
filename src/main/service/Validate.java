@@ -13,8 +13,6 @@ import static main.lib.Color.*;
 
 public class Validate {
     static Scanner sc = new Scanner(System.in);
-
-
     public static void table(String content) {
         CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
         org.nocrala.tools.texttablefmt.Table t = new org.nocrala.tools.texttablefmt.Table(1, BorderStyle.UNICODE_ROUND_BOX, ShownBorders.ALL);
@@ -79,7 +77,6 @@ public class Validate {
 
             if (Pattern.matches("[0-9]+", Digit)) {
                 return Integer.parseInt(Digit);
-
             }
             System.out.println(C_RED + "Invalid input. Try again.(onlyDigit)" + C_RESET);
         }

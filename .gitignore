@@ -23,8 +23,9 @@ bin/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
 
 ### Mac OS ###
 .DS_Store
 text-file
+config.bat
+node_modules

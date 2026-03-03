@@ -197,6 +197,8 @@ public class ProductImpl {
     }
 
     public static void firstPage() {
+        getRow();
+        getTotal();
         try (Connection connection = dbCon.dataSource().getConnection()) {
 
             Statement statement = connection.createStatement();
@@ -347,8 +349,7 @@ public class ProductImpl {
             System.out.print("Press to continue....");
             scanner.nextLine();
 
-            getRow();
-            getTotal();
+
             firstPage();
         } catch (Exception e){
             e.printStackTrace();

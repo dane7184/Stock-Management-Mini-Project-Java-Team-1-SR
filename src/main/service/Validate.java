@@ -26,7 +26,7 @@ public class Validate {
         System.out.println(C_BLUE + t.render() + C_RESET);
     }
 
-    static String onlyLetter(String reason) {
+    public static String onlyLetter(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -40,7 +40,7 @@ public class Validate {
 
     }
 
-    static String valName(String reason) {
+    public static String valName(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -55,7 +55,7 @@ public class Validate {
 
     }
 
-    static boolean yesOrNo() {
+    public static boolean yesOrNo() {
         while (true) {
 
             System.out.print(C_CYAN + "Do you want to continue? (y/n) : " + C_RESET);
@@ -74,7 +74,7 @@ public class Validate {
 
     }
 
-    static int onlyDigit(String reason) {
+    public static int onlyDigit(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -82,14 +82,13 @@ public class Validate {
 
             if (Pattern.matches("[0-9]+", Digit)) {
                 return Integer.parseInt(Digit);
-
             }
             System.out.println(C_RED + "Invalid input. Try again.(onlyDigit)" + C_RESET);
         }
 
     }
 
-    static double onlyDouble(String reason) {
+    public static double onlyDouble(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -110,7 +109,7 @@ public class Validate {
         }
     }
 
-    static String formattedDate() {
+    public static String formattedDate() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM dd, yyyy HH:mm:ss");
         return now.format(formatter);

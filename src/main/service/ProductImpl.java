@@ -2,7 +2,6 @@ package main.service;
 
 import main.lib.Color;
 import main.lib.DbConnection;
-import main.model.Product;
 import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
@@ -10,7 +9,6 @@ import org.nocrala.tools.texttablefmt.Table;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,10 +17,7 @@ import static main.Main.ANSI_RESET;
 import static main.lib.Color.C_RED;
 import static main.lib.Color.C_RESET;
 
-public class ProductImpl {
-
-
-    //static Product product = new Product();
+public class ProductImpl implements ProductServer{
     static int startId ;
 
     static boolean lastPage = false;
@@ -38,7 +33,8 @@ public class ProductImpl {
 
     private static DbConnection dbCon = new DbConnection();
 
-    public static void getTotal() {
+    @Override
+    public void getTotal() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT count(*) as total FROM tb_product");
@@ -57,7 +53,8 @@ public class ProductImpl {
         }
     }
 
-    public static void showAllProducts() {
+    @Override
+    public void showAllProducts() {
         totalRow = 0;
 
         try (Connection connection = dbCon.dataSource().getConnection()) {
@@ -78,10 +75,7 @@ public class ProductImpl {
                 sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id <= " + id + " ORDER BY id DESC limit " + ls + ") ORDER BY id ASC; ";
             }
 
-
             Statement statement = connection.createStatement();
-
-
             ResultSet resultSet = statement.executeQuery(sql);
 
             CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
@@ -97,23 +91,17 @@ public class ProductImpl {
             table.addCell("Quantity", text);
             table.addCell("Import Date", text);
 
-
             while (resultSet.next()) {
-
                 if (totalRow < row) {
                     if (totalRow == 0) {
                         tmpLowerId = resultSet.getInt(1);
-
                     }
-
                     table.addCell(String.valueOf(resultSet.getInt("id")), text);
                     table.addCell(resultSet.getString("name"), text);
                     table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
                     table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
                     table.addCell(String.valueOf(resultSet.getString("import_date")), text);
                     totalRow++;
-
-
                 } else if (totalRow == row) {
                     id = resultSet.getInt("id");
                     break;
@@ -146,7 +134,7 @@ public class ProductImpl {
         }
     }
 
-    public static void nextPage() {
+    public void nextPage() {
 
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
@@ -157,7 +145,6 @@ public class ProductImpl {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
         totalRow = 0;
         next = true;
@@ -170,7 +157,7 @@ public class ProductImpl {
         showAllProducts();
     }
 
-    public static void getRow() {
+    public void getRow() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultRow = statement.executeQuery("SELECT * FROM tb_set_row");
@@ -183,18 +170,17 @@ public class ProductImpl {
         }
     }
 
-    public static void previousPage() {
+    public void previousPage() {
         if (startPage > 1) {
             startPage--;
             id = tmpLowerId;
         }
         next = false;
         showAllProducts();
-
-
     }
 
-    public static void firstPage() {
+    @Override
+    public void firstPage() {
         getRow();
         getTotal();
         try (Connection connection = dbCon.dataSource().getConnection()) {
@@ -209,14 +195,14 @@ public class ProductImpl {
             startPage = 1;
             showAllProducts();
         } catch (Exception e) {
+            e.getMessage();
         }
 
     }
 
-    public static void laterPage() {
+    @Override
+    public void laterPage() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
-
-
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id FROM tb_product order by id asc;");
             while (resultSet.next()) {
@@ -229,11 +215,13 @@ public class ProductImpl {
             showAllProducts();
             lastPage = false;
         } catch (Exception e) {
+            e.getMessage();
         }
 
     }
 
-    public static void goTo(int pageNumber) {
+    @Override
+    public void goTo(int pageNumber) {
         if (pageNumber > totalPage) {
             System.out.println("Page number is greater than total page");
             return;
@@ -262,7 +250,7 @@ public class ProductImpl {
         }
     }
 
-    public static void setRow(int rowNumber) {
+    public void setRow(int rowNumber) {
         if (row > total) {
             System.out.println("Row number is greater than total product");
         }
@@ -287,9 +275,10 @@ public class ProductImpl {
             }
         }
         showAllProducts();
-
     }
-    public static void deleteProduct(){
+
+    @Override
+    public void deleteProduct(){
         Scanner scanner =  new Scanner(System.in);
         try (Connection connection = dbCon.dataSource().getConnection()) {
             int searchId = Validate.onlyDigit("ID to Delete");
@@ -346,14 +335,14 @@ public class ProductImpl {
             System.out.print("Press to continue....");
             scanner.nextLine();
 
-
             firstPage();
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public static void searchProductByName() {
+    @Override
+    public void searchProductByName() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter product name: ");
         String name = scanner.nextLine();
@@ -409,7 +398,6 @@ public class ProductImpl {
                 System.out.print("Press Enter to continue...");
                 scanner.nextLine();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

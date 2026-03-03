@@ -52,7 +52,7 @@ public class Main {
                 case "R" -> System.out.println("Read");
                 case "U" -> System.out.println("Update");
                 case "D" -> System.out.println("Restore");
-                case "S" -> System.out.println("Search (Name)");
+                case "S" -> ProductImpl.searchProductByName();
                 case "Se" -> System.out.println("Set Row");
                 case "Sa" -> System.out.println("Save");
                 case "Un" -> System.out.println("Unsave");

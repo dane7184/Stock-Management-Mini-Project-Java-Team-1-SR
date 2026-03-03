@@ -14,13 +14,14 @@ public class Main {
 
     public static void main(String[] args) {
 
+        ProductImpl productImpl = new ProductImpl();
 
         boolean isValid = false;
         table("Main");
         String option;
         Scanner sc = new Scanner(System.in);
         while (!isValid) {
-            ProductImpl.showAllProducts();
+            productImpl.showAllProducts();
             System.out.print(ANSI_GREEN + "N." + ANSI_RESET + " Next Page");
             System.out.print(ANSI_GREEN + "\tP. " + ANSI_RESET + "Previous Page");
             System.out.print(ANSI_GREEN + "\tF. " + ANSI_RESET + "First Page");
@@ -48,14 +49,14 @@ public class Main {
                 case "L" -> System.out.println("Last Page");
                 case "G" -> System.out.println("Goto");
 
-                case "W" -> System.out.println("Write");
+                case "W" -> productImpl.insertProduct();
                 case "R" -> System.out.println("Read");
                 case "U" -> System.out.println("Update");
                 case "D" -> System.out.println("Restore");
                 case "S" -> System.out.println("Search (Name)");
                 case "Se" -> System.out.println("Set Row");
-                case "Sa" -> System.out.println("Save");
-                case "Un" -> System.out.println("Unsave");
+                case "SA" -> productImpl.saveAndUpdateProductToDb();
+                case "Un" -> System.out.println("BackUp");
                 case "Re" -> System.out.println("Restore");
                 case "E" -> System.out.println("Exit");
                 default -> System.out.println(ANSI_RED + "\nInvalid Input\n" + ANSI_RESET);

@@ -89,7 +89,7 @@ public class Validate {
 
     }
 
-    static double onlyDouble(String reason) {
+    public static double onlyDouble(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);

@@ -9,7 +9,7 @@ public class DbConnection {
     public DataSource dataSource(){
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUser("postgres");
-        dataSource.setPassword("Vechey");
+        dataSource.setPassword("1234");
         dataSource.setDatabaseName("postgres");
         return dataSource;
     }

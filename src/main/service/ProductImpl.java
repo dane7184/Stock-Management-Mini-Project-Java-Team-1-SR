@@ -19,6 +19,7 @@ public class ProductImpl {
     //static Product product = new Product();
     static int startId ;
 
+    static boolean lastPage = false;
     static boolean next = true;
     static int tmpLowerId;
     static int lowerId;
@@ -61,10 +62,14 @@ public class ProductImpl {
             } else {
                 sign = "<=";
             }
-            if (sign.equals(">=")) {
+            if (sign.equals(">=") && !lastPage) {
                 sql = "SELECT * FROM tb_product where id >= " + id + " order by id";
-            } else {
+            } else if(sign.equals("<=") && !lastPage) {
                 sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id < " + id + " ORDER BY id DESC limit " + row + ") ORDER BY id ASC; ";
+            }
+            else {
+                int ls = total%row;
+                sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id <= " + id + " ORDER BY id DESC limit " + ls + ") ORDER BY id ASC; ";
             }
 
 
@@ -192,6 +197,7 @@ public class ProductImpl {
                 id = resultSet.getInt("id");
             }
             System.out.println("First Page : " + id);
+            next=true;
             startPage = 1;
             showAllProducts();
         } catch (Exception e) {
@@ -202,13 +208,18 @@ public class ProductImpl {
     public static void laterPage() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
 
+
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT id FROM tb_product order by id asc ");
+            ResultSet resultSet = statement.executeQuery("SELECT id FROM tb_product order by id asc;");
             while (resultSet.next()) {
                 id = resultSet.getInt(1);
+
             }
+            next = false;
+            lastPage = true;
             startPage = totalPage;
             showAllProducts();
+            lastPage = false;
         } catch (Exception e) {
         }
 
@@ -249,8 +260,6 @@ public class ProductImpl {
         }
         else {
 
-
-
             try (Connection connection = dbCon.dataSource().getConnection()) {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate("update tb_set_row set row=" + rowNumber);
@@ -258,6 +267,8 @@ public class ProductImpl {
                 while (rs.next()) {
                     startId = rs.getInt("id");
                 }
+                startPage=1;
+                next=true;
 
                 id = startId;
                 getRow();

@@ -2,6 +2,7 @@
   <library name="text-table-formatter-1.1.2">
     <CLASSES>
       <root url="jar://$USER_HOME$/Downloads/text-table-formatter-1.1.2/lib/text-table-formatter-1.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../LIBRARY/text-table-formatter-1.1.2/lib/text-table-formatter-1.1.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -27,6 +27,8 @@ interface ProductServer {
 
     void showUnsavedProducts();
 
+    void getProductById();
+
     void updateProduct();
 
     void showUnsaveUpdate();

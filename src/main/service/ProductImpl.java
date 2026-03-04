@@ -9,7 +9,9 @@ import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 import static main.Main.ANSI_GREEN;
 import static main.Main.ANSI_RESET;
@@ -19,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Scanner;
 import java.util.Date;
 
 public class ProductImpl implements ProductServer{
@@ -46,11 +49,10 @@ public class ProductImpl implements ProductServer{
             ResultSet resultSet = statement.executeQuery("SELECT count(*) as total FROM tb_product");
             while (resultSet.next()) {
                 total = resultSet.getInt(1);
-                if(total%row==0){
+                if (total % row == 0) {
 
-                totalPage = total / row;
-                }
-                else {
+                    totalPage = total / row;
+                } else {
                     totalPage = (total / row) + 1;
                 }
             }
@@ -108,6 +110,12 @@ public class ProductImpl implements ProductServer{
     public void firstPage() {
         getRow();
         getTotal();
+        getId();
+        showAllProducts();
+
+
+    }
+    public static void getId (){
         try (Connection connection = dbCon.dataSource().getConnection()) {
 
             Statement statement = connection.createStatement();
@@ -115,10 +123,9 @@ public class ProductImpl implements ProductServer{
             while (resultSet.next()) {
                 id = resultSet.getInt("id");
             }
-            System.out.println("First Page : " + id);
-            next=true;
+            next = true;
             startPage = 1;
-            showAllProducts();
+
         } catch (Exception e) {
             e.getMessage();
         }
@@ -176,7 +183,7 @@ public class ProductImpl implements ProductServer{
     }
 
     public void setRow(int rowNumber) {
-        if (row > total) {
+        if (rowNumber > total) {
             System.out.println("Row number is greater than total product");
         }
         else {
@@ -188,8 +195,8 @@ public class ProductImpl implements ProductServer{
                 while (rs.next()) {
                     startId = rs.getInt("id");
                 }
-                startPage=1;
-                next=true;
+                startPage = 1;
+                next = true;
 
                 id = startId;
                 getRow();
@@ -317,25 +324,25 @@ public class ProductImpl implements ProductServer{
                 productId.add(proId.getInt("id"));
             }
 
-            if ( !productId.contains(searchId)){
-                System.out.println(C_RED + "No Record Was Found With Id : " + searchId + C_RESET);
-            }else {
+            if (!productId.contains(searchId)) {
+                System.out.println(Color.C_RED + "No Record Was Found With Id : " + searchId + Color.C_RESET);
+            } else {
                 System.out.println(table.render());
                 boolean deleted = true;
                 String letter;
                 do {
                     System.out.print(Color.C_GREEN + "Are You Sure to delete product id : " + searchId + " ? (y /n ) : " + C_RESET);
                     letter = scanner.nextLine().toLowerCase();
-                    if (letter.equals("y")){
+                    if (letter.equals("y")) {
                         statement.executeUpdate("DELETE FROM tb_product where id = " + searchId);
                         System.out.println(Color.C_GREEN + "Delete Successfully!" + C_RESET);
                         deleted = false;
-                    }else if (letter.equals("n")){
+                    } else if (letter.equals("n")) {
                         deleted = false;
-                    }else{
+                    } else {
                         System.out.println(C_RED + "Invalid input. Try again.(y/n)" + C_RESET);
                     }
-                }while (deleted);
+                } while (deleted);
             }
 
             System.out.print("Press to continue....");
@@ -409,6 +416,55 @@ public class ProductImpl implements ProductServer{
         }
     }
 
+    @Override
+    public void saveAndUpdateProductToDb() {
+
+
+            System.out.println("UI for Update Insert To Database And UU Update date to database");
+            Scanner scanner = new Scanner(System.in);
+            boolean isRunning = true;
+
+            while (isRunning) {
+                System.out.println("UI  : Insert Unsaved To Database");
+                System.out.println("UU  : Update Product In Database");
+                System.out.println("E   : Exit");
+                System.out.print("\nEnter product option: ");
+                String option = scanner.nextLine().trim().toUpperCase();
+                switch (option) {
+                    case "UI" -> {
+                        showUnsavedProducts();
+
+                        if (products.isEmpty()) {
+                            System.out.println("No unsaved products.");
+                            break;
+                        }
+
+                        System.out.print("Save to database? (Y/N): ");
+                        String yN = scanner.nextLine().trim();
+
+                        if (yN.equalsIgnoreCase("Y")) {
+                            saveInsertProduct();
+                        } else {
+                            System.out.println("Products were not saved.");
+                        }
+                    }
+
+                    case "UU" -> {
+                        System.out.println("Update feature coming soon...");
+                    }
+
+                    case "E" -> {
+                        isRunning = false;
+                        System.out.println("Exit Save/Update Menu.");
+                    }
+
+                    default -> System.out.println("Invalid option!");
+                }
+            }
+
+
+    }
+
 
     @Override
     public void unsaveInsertProduct(Product product) {
@@ -448,6 +504,75 @@ public class ProductImpl implements ProductServer{
         }
 
         System.out.println(table.render());
+    }
+
+    @Override
+    public void getProductById() {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter product id: ");
+        int id;
+        while (true) {
+            System.out.print("Enter product id: ");
+            if (scanner.hasNextInt()) {
+                id = scanner.nextInt();
+                if (id < 0) {
+                    System.out.println("ID can not be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter an integer.");
+                scanner.next();
+            }
+        }
+        scanner.nextLine();
+
+        String sql = "SELECT * FROM tb_product WHERE id = ?";
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet resultSet = ps.executeQuery();
+
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+
+            table.addCell("ID", text);
+            table.addCell("Name", text);
+            table.addCell("Price", text);
+            table.addCell("Quantity", text);
+            table.addCell("Import Date", text);
+
+            boolean found = false;
+
+            while (resultSet.next()) {
+                found = true;
+
+                table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                table.addCell(resultSet.getString("name"), text);
+                table.addCell(String.valueOf(resultSet.getDouble("unit_price")), text);
+                table.addCell(String.valueOf(resultSet.getInt("stock_qty")), text);
+                table.addCell(String.valueOf(resultSet.getDate("import_date")), text);
+            }
+
+            if (found) {
+                System.out.println(table.render());
+            } else {
+                System.out.println("Product not found with id: " + id);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -572,6 +697,48 @@ public class ProductImpl implements ProductServer{
 
                 default -> System.out.println("Invalid option!");
             }
+            public void readProductById() {
+                Scanner sc = new Scanner(System.in);
+                System.out.print("Enter Product ID: ");
+                int id = sc.nextInt();
+                sc.nextLine();
+
+                try (Connection connection = dbCon.dataSource().getConnection()) {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM tb_product WHERE id = " + id);
+                    CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+                    Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+                    table.setColumnWidth(0, 18, 30);
+                    table.setColumnWidth(1, 18, 30);
+                    table.setColumnWidth(2, 18, 30);
+                    table.setColumnWidth(3, 18, 30);
+                    table.setColumnWidth(4, 18, 30);
+                    table.addCell("ID", text);
+                    table.addCell("Name", text);
+                    table.addCell("Price", text);
+                    table.addCell("Quantity", text);
+                    table.addCell("Import Date", text);
+
+                    while (resultSet.next()) {
+                        table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                        table.addCell(resultSet.getString("name"), text);
+                        table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
+                        table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
+                        table.addCell(String.valueOf(resultSet.getString("import_date")), text);
+                    }
+                    System.out.println(table.render());
+                    System.out.printf("Press Enter to continue...");
+                    sc.nextLine();
+                    showAllProducts();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            System.out.println(table.render());
+            System.out.printf("Press Enter to continue...");
+            sc.nextLine();
+            showAllProducts();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

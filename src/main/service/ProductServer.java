@@ -28,4 +28,6 @@ interface ProductServer {
     void showUnsavedProducts();
 
     void getProductById();
+
+    void clearUnsaveInsertProducts();
 }

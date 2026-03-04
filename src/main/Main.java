@@ -40,7 +40,7 @@ public class Main {
                 case "S" -> proImlp.searchProductByName();
                 case "SE" -> proImlp.setRow(onlyDigit("Row Number"));
                 case "SA" -> productImpl.saveAndUpdateProductToDb();
-                case "UN" -> System.out.println("Unsave");
+                case "UN" -> proImlp.clearUnsaveInsertProducts();
                 case "RE" -> System.out.println("Restore");
                 case "E" ->{
                 System.out.println("SYSTEM Exit.......!");

@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Scanner;
 import java.util.Date;
 
 public class ProductImpl implements ProductServer{
@@ -319,7 +318,7 @@ public class ProductImpl implements ProductServer{
             }
 
             if ( !productId.contains(searchId)){
-                System.out.println(Color.C_RED + "No Record Was Found With Id : " + searchId + Color.C_RESET);
+                System.out.println(C_RED + "No Record Was Found With Id : " + searchId + C_RESET);
             }else {
                 System.out.println(table.render());
                 boolean deleted = true;
@@ -412,8 +411,6 @@ public class ProductImpl implements ProductServer{
 
     @Override
     public void saveAndUpdateProductToDb() {
-
-
             System.out.println("UI for Update Insert To Database And UU Update date to database");
             Scanner scanner = new Scanner(System.in);
             boolean isRunning = true;
@@ -455,10 +452,7 @@ public class ProductImpl implements ProductServer{
                     default -> System.out.println("Invalid option!");
                 }
             }
-
-
     }
-
 
     @Override
     public void unsaveInsertProduct(Product product) {
@@ -683,6 +677,61 @@ public class ProductImpl implements ProductServer{
             showAllProducts();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void clearUnsaveInsertProducts() {
+
+        Scanner scanner = new Scanner(System.in);
+        boolean isRunning = true;
+
+        while (isRunning) {
+
+            System.out.println("\n===== CLEAR MENU =====");
+            System.out.println("1. Clear Insert Products");
+            System.out.println("2. Clear Update Products");
+            System.out.println("3. Exit");
+            System.out.print("Enter option: ");
+
+            if (!scanner.hasNextInt()) {
+                System.out.println("Invalid input! Enter number 1-3.");
+                scanner.next();
+                continue;
+            }
+
+            int option = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (option) {
+
+                case 1 -> {
+
+                    if (products.isEmpty()) {
+                        System.out.println("No unsaved insert products.");
+                        break;
+                    }
+
+                    showUnsavedProducts();
+
+                    System.out.print("Are you sure to clear all insert products? (Y/N): ");
+                    String confirm = scanner.nextLine().trim();
+
+                    if (confirm.equalsIgnoreCase("Y")) {
+                        products.clear();
+                        System.out.println("All unsaved insert products cleared.");
+                    } else {
+                        System.out.println("Operation cancelled.");
+                    }
+                }
+
+                case 2 -> {
+                    isRunning = false;
+                    System.out.println("Exit clear menu.");
+                }
+
+                default -> System.out.println("Invalid option!");
+            }
         }
     }
 }

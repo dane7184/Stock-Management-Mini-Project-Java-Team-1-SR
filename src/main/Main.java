@@ -33,7 +33,7 @@ public class Main {
                 case "F" -> proImlp.firstPage();
                 case "L" -> proImlp.laterPage();
                 case "G" -> proImlp.goTo(onlyDigit("page Number"));
-                case "W" -> System.out.println("Write");
+                case "W" -> proImlp.insertProduct();
                 case "R" -> proImlp.getProductById();
                 case "U" -> System.out.println("Update");
                 case "D" -> proImlp.deleteProduct();

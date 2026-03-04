@@ -8,6 +8,7 @@ import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Scanner;
 import java.util.Date;
+
+
+
 
 public class ProductImpl implements ProductServer{
     static int startId ;
@@ -48,11 +52,10 @@ public class ProductImpl implements ProductServer{
             ResultSet resultSet = statement.executeQuery("SELECT count(*) as total FROM tb_product");
             while (resultSet.next()) {
                 total = resultSet.getInt(1);
-                if(total%row==0){
+                if (total % row == 0) {
 
-                totalPage = total / row;
-                }
-                else {
+                    totalPage = total / row;
+                } else {
                     totalPage = (total / row) + 1;
                 }
             }
@@ -60,6 +63,95 @@ public class ProductImpl implements ProductServer{
             e.printStackTrace();
         }
     }
+
+    public  void showAllProducts() {
+        totalRow = 0;
+
+        try (Connection connection = dbCon.dataSource().getConnection()) {
+            String sign;
+            String sql = "";
+            if (next) {
+                sign = ">=";
+            } else {
+                sign = "<=";
+            }
+            if (sign.equals(">=") && !lastPage) {
+                sql = "SELECT * FROM tb_product where id >= " + id + " order by id";
+            } else if (sign.equals("<=") && !lastPage) {
+                sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id < " + id + " ORDER BY id DESC limit " + row + ") ORDER BY id ASC; ";
+            } else {
+                int ls = total % row;
+                sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id <= " + id + " ORDER BY id DESC limit " + ls + ") ORDER BY id ASC; ";
+            }
+
+
+            Statement statement = connection.createStatement();
+
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+            table.addCell("ID", text);
+            table.addCell("Name", text);
+            table.addCell("Price", text);
+            table.addCell("Quantity", text);
+            table.addCell("Import Date", text);
+
+
+            while (resultSet.next()) {
+
+                if (totalRow < row) {
+                    if (totalRow == 0) {
+                        tmpLowerId = resultSet.getInt(1);
+
+                    }
+
+                    table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                    table.addCell(resultSet.getString("name"), text);
+                    table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
+                    table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
+                    table.addCell(String.valueOf(resultSet.getString("import_date")), text);
+                    totalRow++;
+
+
+                } else if (totalRow == row) {
+                    id = resultSet.getInt("id");
+                    break;
+                }
+
+
+            }
+            table.addCell(" PAGE : " + startPage + "/" + totalPage, text, 2);
+            table.addCell("TOTAL RECORD : " + total, text, 3);
+
+            System.out.println(table.render());
+            System.out.print(ANSI_GREEN + "N." + ANSI_RESET + " Next Page");
+            System.out.print(ANSI_GREEN + "\tP. " + ANSI_RESET + "Previous Page");
+            System.out.print(ANSI_GREEN + "\tF. " + ANSI_RESET + "First Page");
+            System.out.print(ANSI_GREEN + "\tL. " + ANSI_RESET + "Last Page");
+            System.out.print(ANSI_GREEN + "\tG. " + ANSI_RESET + "Goto");
+            System.out.print("\n\n");
+            System.out.print(ANSI_GREEN + "W. " + ANSI_RESET + "Write");
+            System.out.print(ANSI_GREEN + "\tR. " + ANSI_RESET + "Read");
+            System.out.print(ANSI_GREEN + "\tU. " + ANSI_RESET + "Update");
+            System.out.print(ANSI_GREEN + "\tD. " + ANSI_RESET + "Delete");
+            System.out.print(ANSI_GREEN + "\tS. " + ANSI_RESET + "Search (Name)");
+            System.out.print(ANSI_GREEN + "\tSe. " + ANSI_RESET + "Set Row\n\n");
+            System.out.print(ANSI_GREEN + "Sa. " + ANSI_RESET + "Save");
+            System.out.print(ANSI_GREEN + "\tUn. " + ANSI_RESET + "Unsave");
+            System.out.print(ANSI_GREEN + "\tBa. " + ANSI_RESET + "BackUp");
+            System.out.print(ANSI_GREEN + "\tRe. " + ANSI_RESET + "Restore");
+            System.out.print(ANSI_GREEN + "\tE. " + ANSI_RESET + "Exit\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void nextPage() {
 
@@ -72,6 +164,7 @@ public class ProductImpl implements ProductServer{
         } catch (Exception e) {
             e.printStackTrace();
         }
+
 
         totalRow = 0;
         next = true;
@@ -104,12 +197,20 @@ public class ProductImpl implements ProductServer{
         }
         next = false;
         showAllProducts();
+
+
     }
 
     @Override
     public void firstPage() {
         getRow();
         getTotal();
+        getId();
+        showAllProducts();
+
+
+    }
+    public static void getId (){
         try (Connection connection = dbCon.dataSource().getConnection()) {
 
             Statement statement = connection.createStatement();
@@ -117,10 +218,9 @@ public class ProductImpl implements ProductServer{
             while (resultSet.next()) {
                 id = resultSet.getInt("id");
             }
-            System.out.println("First Page : " + id);
-            next=true;
+            next = true;
             startPage = 1;
-            showAllProducts();
+
         } catch (Exception e) {
             e.getMessage();
         }
@@ -177,7 +277,7 @@ public class ProductImpl implements ProductServer{
     }
 
     public void setRow(int rowNumber) {
-        if (row > total) {
+        if (rowNumber > total) {
             System.out.println("Row number is greater than total product");
         }
         else {
@@ -189,8 +289,8 @@ public class ProductImpl implements ProductServer{
                 while (rs.next()) {
                     startId = rs.getInt("id");
                 }
-                startPage=1;
-                next=true;
+                startPage = 1;
+                next = true;
 
                 id = startId;
                 getRow();
@@ -201,87 +301,7 @@ public class ProductImpl implements ProductServer{
             }
         }
         showAllProducts();
-    }
 
-    @Override
-    public void showAllProducts() {
-        totalRow = 0;
-
-        try (Connection connection = dbCon.dataSource().getConnection()) {
-            String sign;
-            String sql = "";
-            if (next) {
-                sign = ">=";
-            } else {
-                sign = "<=";
-            }
-            if (sign.equals(">=") && !lastPage) {
-                sql = "SELECT * FROM tb_product where id >= " + id + " order by id";
-            } else if(sign.equals("<=") && !lastPage) {
-                sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id < " + id + " ORDER BY id DESC limit " + row + ") ORDER BY id ASC; ";
-            }
-            else {
-                int ls = total%row;
-                sql = "SELECT * FROM (SELECT * FROM tb_product WHERE id <= " + id + " ORDER BY id DESC limit " + ls + ") ORDER BY id ASC; ";
-            }
-
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
-
-            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
-            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
-            table.setColumnWidth(0, 18, 30);
-            table.setColumnWidth(1, 18, 30);
-            table.setColumnWidth(2, 18, 30);
-            table.setColumnWidth(3, 18, 30);
-            table.setColumnWidth(4, 18, 30);
-            table.addCell("ID", text);
-            table.addCell("Name", text);
-            table.addCell("Price", text);
-            table.addCell("Quantity", text);
-            table.addCell("Import Date", text);
-
-            while (resultSet.next()) {
-                if (totalRow < row) {
-                    if (totalRow == 0) {
-                        tmpLowerId = resultSet.getInt(1);
-                    }
-                    table.addCell(String.valueOf(resultSet.getInt("id")), text);
-                    table.addCell(resultSet.getString("name"), text);
-                    table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
-                    table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
-                    table.addCell(String.valueOf(resultSet.getString("import_date")), text);
-                    totalRow++;
-                } else if (totalRow == row) {
-                    id = resultSet.getInt("id");
-                    break;
-                }
-
-
-            }
-            table.addCell(" PAGE : " + startPage + "/" + totalPage, text, 2);
-            table.addCell("TOTAL RECORD : " + total, text, 3);
-
-            System.out.println(table.render());
-            System.out.print(ANSI_GREEN + "N." + ANSI_RESET + " Next Page");
-            System.out.print(ANSI_GREEN + "\tP. " + ANSI_RESET + "Previous Page");
-            System.out.print(ANSI_GREEN + "\tF. " + ANSI_RESET + "First Page");
-            System.out.print(ANSI_GREEN + "\tL. " + ANSI_RESET + "Last Page");
-            System.out.print(ANSI_GREEN + "\tG. " + ANSI_RESET + "Goto");
-            System.out.print("\n\n");
-            System.out.print(ANSI_GREEN + "W. " + ANSI_RESET + "Write");
-            System.out.print(ANSI_GREEN + "\tR. " + ANSI_RESET + "Read");
-            System.out.print(ANSI_GREEN + "\tU. " + ANSI_RESET + "Update");
-            System.out.print(ANSI_GREEN + "\tD. " + ANSI_RESET + "Delete");
-            System.out.print(ANSI_GREEN + "\tS. " + ANSI_RESET + "Search (Name)");
-            System.out.print(ANSI_GREEN + "\tSe. " + ANSI_RESET + "Set Row\n\n");
-            System.out.print(ANSI_GREEN + "Sa. " + ANSI_RESET + "Save");
-            System.out.print(ANSI_GREEN + "\tUn. " + ANSI_RESET + "Unsave");
-            System.out.print(ANSI_GREEN + "\tRe. " + ANSI_RESET + "Restore");
-            System.out.print(ANSI_GREEN + "\tE. " + ANSI_RESET + "Exit\n");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -318,32 +338,33 @@ public class ProductImpl implements ProductServer{
                 productId.add(proId.getInt("id"));
             }
 
-            if ( !productId.contains(searchId)){
+            if (!productId.contains(searchId)) {
                 System.out.println(Color.C_RED + "No Record Was Found With Id : " + searchId + Color.C_RESET);
-            }else {
+            } else {
                 System.out.println(table.render());
                 boolean deleted = true;
                 String letter;
                 do {
                     System.out.print(Color.C_GREEN + "Are You Sure to delete product id : " + searchId + " ? (y /n ) : " + C_RESET);
                     letter = scanner.nextLine().toLowerCase();
-                    if (letter.equals("y")){
+                    if (letter.equals("y")) {
                         statement.executeUpdate("DELETE FROM tb_product where id = " + searchId);
                         System.out.println(Color.C_GREEN + "Delete Successfully!" + C_RESET);
                         deleted = false;
-                    }else if (letter.equals("n")){
+                    } else if (letter.equals("n")) {
                         deleted = false;
-                    }else{
+                    } else {
                         System.out.println(C_RED + "Invalid input. Try again.(y/n)" + C_RESET);
                     }
-                }while (deleted);
+                } while (deleted);
             }
 
             System.out.print("Press to continue....");
             scanner.nextLine();
 
+
             firstPage();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -22,5 +22,3 @@ create table if not exists tb_set_row (row int);
 insert into tb_set_row values (1);
 
 TRUNCATE TABLE tb_product RESTART IDENTITY;
-
-select * from tb_product where id = 1;

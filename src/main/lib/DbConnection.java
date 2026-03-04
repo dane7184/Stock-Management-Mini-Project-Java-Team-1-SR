@@ -5,6 +5,7 @@ import org.postgresql.ds.PGSimpleDataSource;
 import javax.sql.DataSource;
 
 public class DbConnection {
+
     public DataSource dataSource(){
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUser("postgres");
@@ -12,5 +13,4 @@ public class DbConnection {
         dataSource.setDatabaseName("postgres");
         return dataSource;
     }
-
 }

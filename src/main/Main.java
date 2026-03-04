@@ -49,7 +49,7 @@ public class Main {
                 case "G" -> System.out.println("Goto");
 
                 case "W" -> System.out.println("Write");
-                case "R" -> System.out.println("Read");
+                case "R" -> ProductImpl.readProductById();
                 case "U" -> System.out.println("Update");
                 case "D" -> System.out.println("Restore");
                 case "S" -> System.out.println("Search (Name)");

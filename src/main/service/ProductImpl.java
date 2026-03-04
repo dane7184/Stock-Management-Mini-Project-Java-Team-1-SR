@@ -9,6 +9,7 @@ import org.nocrala.tools.texttablefmt.Table;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class ProductImpl {
 
@@ -42,6 +43,36 @@ public class ProductImpl {
 
             System.out.println(table.render());
         } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void readProductById(){
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Product ID: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        try( Connection connection = dbCon.dataSource().getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM tb_product WHERE id = " + id);
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+
+            while(resultSet.next()) {
+                table.addCell(String.valueOf(resultSet.getInt("id")),text);
+                table.addCell(resultSet.getString("name"),text);
+                table.addCell(String.valueOf(resultSet.getString("unit_price")),text);
+                table.addCell(String.valueOf(resultSet.getString("stock_qty")),text);
+                table.addCell(String.valueOf(resultSet.getString("import_date")),text);
+            }
+            System.out.println(table.render());
+        }catch (Exception e){
             e.printStackTrace();
         }
     }

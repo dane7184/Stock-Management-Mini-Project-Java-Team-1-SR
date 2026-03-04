@@ -506,7 +506,21 @@ public class ProductImpl implements ProductServer{
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter product id: ");
-        int id = scanner.nextInt();
+        int id;
+        while (true) {
+            System.out.print("Enter product id: ");
+            if (scanner.hasNextInt()) {
+                id = scanner.nextInt();
+                if (id < 0) {
+                    System.out.println("ID can not be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter an integer.");
+                scanner.next();
+            }
+        }
         scanner.nextLine();
 
         String sql = "SELECT * FROM tb_product WHERE id = ?";

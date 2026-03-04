@@ -3,7 +3,7 @@ package main.model;
 import java.util.Date;
 
 public class Product {
-    private String id;
+    private int id;
     private String name;
     private double price;
     private int qty;
@@ -11,7 +11,7 @@ public class Product {
 
     public Product() {}
 
-    public Product(String id, Date date, int qty, double price, String name) {
+    public Product(int id, String name,  double price, int qty, Date date) {
         this.id = id;
         this.date = date;
         this.qty = qty;
@@ -19,11 +19,18 @@ public class Product {
         this.name = name;
     }
 
-    public String getId() {
+    public Product(String name, double price, int qty, Date date) {
+        this.name = name;
+        this.price = price;
+        this.qty = qty;
+        this.date = date;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

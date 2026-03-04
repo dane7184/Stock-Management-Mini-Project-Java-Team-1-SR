@@ -1,0 +1,48 @@
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+
+        //con.createStatement(); ++ Statement res ; for create table or update using excuteUpdate and excuteQuary
+        //ResultSet rs = con.createStatement().executeUpdate(); use with while (re.next()){};
+        //PreparedStatement ps = con.prepareStatement("update person set name=? where id =? ");
+        //con.autoCommit(false); con.rollback(); con.commit();
+
+        final String driverName = "jdbc:postgresql://";
+        final String hostName = "localhost:";
+        final String port = "5432/";
+        final String dbName = "mydb";
+        final String dbUser = "postgres";
+        final String dbPassword = "admin";
+
+        try (Connection con = DriverManager.getConnection(driverName + hostName + port + dbName, dbUser, dbPassword)) {
+            if (con.isValid(2)) {
+                System.out.println(" connection running ... .");
+            }
+
+            Statement stm = con.createStatement();
+            stm.executeUpdate("CREATE table if not exists person (id serial , name varchar , money int)");
+//          int rowAffected = stm.executeUpdate("insert into person values (default , 'ouk nha seth',555)");
+//            System.out.println(" rowAffected : " + rowAffected);
+
+
+            PreparedStatement ps = con.prepareStatement("update person set name=? where id =? ");
+
+            ResultSet re = stm.executeQuery("select * from person");
+            while (re.next()) {
+                int id = re.getInt("id");
+                String name = re.getString("name");
+                int money = re.getInt("money");
+                System.out.println("ID : " + id + " |  Name : " + name + " | money : " + money + "$");
+            }
+
+            System.out.println("when Update!! ");
+
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+
+}

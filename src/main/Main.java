@@ -1,5 +1,6 @@
 package main;
 
+import main.model.Product;
 import main.service.ProductImpl;
 
 
@@ -13,7 +14,6 @@ public class Main {
     public static final String ANSI_RED = "\u001B[31m";
 
     public static void main(String[] args) {
-
 
         boolean isValid = false;
         table("Main");
@@ -48,7 +48,8 @@ public class Main {
                 case "L" -> System.out.println("Last Page");
                 case "G" -> System.out.println("Goto");
 
-                case "W" -> System.out.println("Write");
+//                case "W" -> System.out.println("Write");
+                case "W" -> Product.writeProduct();
                 case "R" -> System.out.println("Read");
                 case "U" -> System.out.println("Update");
                 case "D" -> System.out.println("Restore");

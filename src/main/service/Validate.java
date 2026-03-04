@@ -6,6 +6,7 @@ import org.nocrala.tools.texttablefmt.ShownBorders;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,6 @@ import static main.lib.Color.C_GREEN;
 import static main.lib.Color.C_RESET;
 import static main.lib.Color.C_BLUE;
 import static main.lib.Color.C_RED;
-import static main.lib.Color.C_PURPLE;
 import static main.lib.Color.C_CYAN;
 
 public class Validate {
@@ -26,7 +26,8 @@ public class Validate {
         System.out.println(C_BLUE + t.render() + C_RESET);
     }
 
-    static String onlyLetter(String reason) {
+
+    public static String onlyLetter(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -40,17 +41,17 @@ public class Validate {
 
     }
 
-    static String valName(String reason) {
+    public static String valName(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
             String letter = sc.nextLine().trim();
 
-            if (Pattern.matches("[a-zA-Z]+ {1}[a-zA-Z]+", letter)) {
+            if (Pattern.matches("[a-zA-Z0-9]+", letter)) {
                 return letter;
 
             }
-            System.out.println(C_RED + "Invalid input (only 1 space and it's letter ). Try again" + C_RESET);
+            System.out.println(C_RED + "Invalid input Try again" + C_RESET);
         }
 
     }
@@ -74,7 +75,7 @@ public class Validate {
 
     }
 
-    static int onlyDigit(String reason) {
+    public static int onlyDigit(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -88,8 +89,23 @@ public class Validate {
         }
 
     }
+    public static int qty(String reason) {
+        while (true) {
 
-    static double onlyDouble(String reason) {
+            System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
+            String digit = sc.nextLine();
+
+            if (Pattern.matches("[1-9][0-9]*", digit)) {
+                return Integer.parseInt(digit);
+            }
+
+            System.out.println(C_RED +
+                    "Invalid input. Must start with 1-9 (no leading zero)."
+                    + C_RESET);
+        }
+    }
+
+    public static double onlyDouble(String reason) {
         while (true) {
 
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
@@ -110,10 +126,12 @@ public class Validate {
         }
     }
 
-    static String formattedDate() {
+    public static String formattedDate() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM dd, yyyy HH:mm:ss");
         return now.format(formatter);
 
     }
 }
+
+

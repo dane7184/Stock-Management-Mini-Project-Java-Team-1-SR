@@ -2,14 +2,14 @@ package main.service;
 
 import main.lib.Color;
 import main.lib.DbConnection;
+import main.model.Product;
 import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -18,12 +18,18 @@ import static main.Main.ANSI_GREEN;
 import static main.Main.ANSI_RESET;
 import static main.lib.Color.C_RED;
 import static main.lib.Color.C_RESET;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
+import java.util.Date;
 
-public class ProductImpl {
 
 
-    //static Product product = new Product();
-    static int startId;
+
+public class ProductImpl implements ProductServer{
+    static int startId ;
 
     static boolean lastPage = false;
     static boolean next = true;
@@ -37,8 +43,10 @@ public class ProductImpl {
     static int id = 0;
 
     private static DbConnection dbCon = new DbConnection();
+    static List<Product> products = new ArrayList<>();
 
-    public static void getTotal() {
+    @Override
+    public void getTotal() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT count(*) as total FROM tb_product");
@@ -56,7 +64,7 @@ public class ProductImpl {
         }
     }
 
-    public static void showAllProducts() {
+    public  void showAllProducts() {
         totalRow = 0;
 
         try (Connection connection = dbCon.dataSource().getConnection()) {
@@ -144,7 +152,8 @@ public class ProductImpl {
         }
     }
 
-    public static void nextPage() {
+
+    public void nextPage() {
 
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
@@ -168,7 +177,7 @@ public class ProductImpl {
         showAllProducts();
     }
 
-    public static void getRow() {
+    public void getRow() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultRow = statement.executeQuery("SELECT * FROM tb_set_row");
@@ -181,7 +190,7 @@ public class ProductImpl {
         }
     }
 
-    public static void previousPage() {
+    public void previousPage() {
         if (startPage > 1) {
             startPage--;
             id = tmpLowerId;
@@ -192,7 +201,8 @@ public class ProductImpl {
 
     }
 
-    public static void firstPage() {
+    @Override
+    public void firstPage() {
         getRow();
         getTotal();
         getId();
@@ -212,13 +222,13 @@ public class ProductImpl {
             startPage = 1;
 
         } catch (Exception e) {
+            e.getMessage();
         }
     }
 
-    public static void laterPage() {
+    @Override
+    public void laterPage() {
         try (Connection connection = dbCon.dataSource().getConnection()) {
-
-
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id FROM tb_product order by id asc;");
             while (resultSet.next()) {
@@ -231,11 +241,13 @@ public class ProductImpl {
             showAllProducts();
             lastPage = false;
         } catch (Exception e) {
+            e.getMessage();
         }
 
     }
 
-    public static void goTo(int pageNumber) {
+    @Override
+    public void goTo(int pageNumber) {
         if (pageNumber > totalPage) {
             System.out.println("Page number is greater than total page");
             return;
@@ -264,10 +276,11 @@ public class ProductImpl {
         }
     }
 
-    public static void setRow(int rowNumber) {
+    public void setRow(int rowNumber) {
         if (rowNumber > total) {
             System.out.println("Row number is greater than total product");
-        } else {
+        }
+        else {
 
             try (Connection connection = dbCon.dataSource().getConnection()) {
                 Statement statement = connection.createStatement();
@@ -291,8 +304,9 @@ public class ProductImpl {
 
     }
 
-    public static void deleteProduct() {
-        Scanner scanner = new Scanner(System.in);
+    @Override
+    public void deleteProduct(){
+        Scanner scanner =  new Scanner(System.in);
         try (Connection connection = dbCon.dataSource().getConnection()) {
             int searchId = Validate.onlyDigit("ID to Delete");
             Statement statement = connection.createStatement();
@@ -304,19 +318,18 @@ public class ProductImpl {
             table.setColumnWidth(2, 18, 30);
             table.setColumnWidth(3, 18, 30);
             table.setColumnWidth(4, 18, 30);
-            table.addCell("ID", text);
-            table.addCell("Name", text);
-            table.addCell("Price", text);
-            table.addCell("Quantity", text);
-            table.addCell("Import Date", text);
+            table.addCell("ID",text);
+            table.addCell("Name",text);
+            table.addCell("Price",text);
+            table.addCell("Quantity",text);
+            table.addCell("Import Date",text);
 
-
-            while (resultSet.next()) {
-                table.addCell(String.valueOf(resultSet.getInt("id")), text);
-                table.addCell(resultSet.getString("name"), text);
-                table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
-                table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
-                table.addCell(String.valueOf(resultSet.getString("import_date")), text);
+            while(resultSet.next()) {
+                table.addCell(String.valueOf(resultSet.getInt("id")),text);
+                table.addCell(resultSet.getString("name"),text);
+                table.addCell(String.valueOf(resultSet.getString("unit_price")),text);
+                table.addCell(String.valueOf(resultSet.getString("stock_qty")),text);
+                table.addCell(String.valueOf(resultSet.getString("import_date")),text);
             }
 
             List<Integer> productId = new ArrayList<>();
@@ -356,5 +369,341 @@ public class ProductImpl {
         }
     }
 
+    @Override
+    public void searchProductByName() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter product name: ");
+        String name = scanner.nextLine();
 
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty");
+        }
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     "SELECT id, name, unit_price, stock_qty, import_date " +
+                             "FROM tb_product " +
+                             "WHERE name ILIKE ? " +
+                             "ORDER BY id"
+             )) {
+
+            ps.setString(1, "%" + name.trim() + "%");
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+                Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+                table.setColumnWidth(0, 18, 30);   // ID
+                table.setColumnWidth(1, 18, 30);  // Name
+                table.setColumnWidth(2, 18, 30);  // Price
+                table.setColumnWidth(3, 18, 30);  // Qty
+                table.setColumnWidth(4, 18, 30);  // Import Date
+
+                table.addCell("ID", text);
+                table.addCell("Name", text);
+                table.addCell("Price", text);
+                table.addCell("Quantity", text);
+                table.addCell("Import Date", text);
+
+                boolean found = false;
+                while (resultSet.next()) {
+                    found = true;
+                    table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                    table.addCell(resultSet.getString("name"), text);
+                    table.addCell(String.valueOf(resultSet.getDouble("unit_price")), text);
+                    table.addCell(String.valueOf(resultSet.getInt("stock_qty")), text);
+                    table.addCell(String.valueOf(resultSet.getDate("import_date")), text);
+                }
+
+                if (!found) {
+                    System.out.println("No products found matching: " + name.trim());
+                    System.out.print("Press Enter to continue...");
+                    scanner.nextLine();
+                    return;
+                }
+
+                System.out.println(table.render());
+                System.out.print("Press Enter to continue...");
+                scanner.nextLine();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void saveAndUpdateProductToDb() {
+
+
+            System.out.println("UI for Update Insert To Database And UU Update date to database");
+            Scanner scanner = new Scanner(System.in);
+            boolean isRunning = true;
+
+            while (isRunning) {
+                System.out.println("UI  : Insert Unsaved To Database");
+                System.out.println("UU  : Update Product In Database");
+                System.out.println("E   : Exit");
+                System.out.print("\nEnter product option: ");
+                String option = scanner.nextLine().trim().toUpperCase();
+                switch (option) {
+                    case "UI" -> {
+                        showUnsavedProducts();
+
+                        if (products.isEmpty()) {
+                            System.out.println("No unsaved products.");
+                            break;
+                        }
+
+                        System.out.print("Save to database? (Y/N): ");
+                        String yN = scanner.nextLine().trim();
+
+                        if (yN.equalsIgnoreCase("Y")) {
+                            saveInsertProduct();
+                        } else {
+                            System.out.println("Products were not saved.");
+                        }
+                    }
+
+                    case "UU" -> {
+                        System.out.println("Update feature coming soon...");
+                    }
+
+                    case "E" -> {
+                        isRunning = false;
+                        System.out.println("Exit Save/Update Menu.");
+                    }
+
+                    default -> System.out.println("Invalid option!");
+                }
+            }
+
+
+    }
+
+
+    @Override
+    public void unsaveInsertProduct(Product product) {
+        products.add(product);
+        System.out.println("unsave insert product");
+    }
+
+    @Override
+    public void showUnsavedProducts() {
+
+        if (products.isEmpty()){
+            System.out.println("No unsaved products.");
+            return;
+        }
+
+        CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+        Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+        table.setColumnWidth(0, 18, 30);
+        table.setColumnWidth(1, 18, 30);
+        table.setColumnWidth(2, 18, 30);
+        table.setColumnWidth(3, 18, 30);
+        table.setColumnWidth(4, 18, 30);
+
+        table.addCell("ID",text);
+        table.addCell("Name",text);
+        table.addCell("Price",text);
+        table.addCell("Quantity",text);
+        table.addCell("Import Date",text);
+
+        for (Product product : products) {
+            table.addCell(String.valueOf(product.getId()),text);
+            table.addCell(product.getName(),text);
+            table.addCell(String.valueOf(product.getPrice()),text);
+            table.addCell(String.valueOf(product.getQty()),text);
+            table.addCell(String.valueOf(product.getDate()),text);
+        }
+
+        System.out.println(table.render());
+    }
+
+    @Override
+    public void getProductById() {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter product id: ");
+        int id;
+        while (true) {
+            System.out.print("Enter product id: ");
+            if (scanner.hasNextInt()) {
+                id = scanner.nextInt();
+                if (id < 0) {
+                    System.out.println("ID can not be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter an integer.");
+                scanner.next();
+            }
+        }
+        scanner.nextLine();
+
+        String sql = "SELECT * FROM tb_product WHERE id = ?";
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet resultSet = ps.executeQuery();
+
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+
+            table.addCell("ID", text);
+            table.addCell("Name", text);
+            table.addCell("Price", text);
+            table.addCell("Quantity", text);
+            table.addCell("Import Date", text);
+
+            boolean found = false;
+
+            while (resultSet.next()) {
+                found = true;
+
+                table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                table.addCell(resultSet.getString("name"), text);
+                table.addCell(String.valueOf(resultSet.getDouble("unit_price")), text);
+                table.addCell(String.valueOf(resultSet.getInt("stock_qty")), text);
+                table.addCell(String.valueOf(resultSet.getDate("import_date")), text);
+            }
+
+            if (found) {
+                System.out.println(table.render());
+            } else {
+                System.out.println("Product not found with id: " + id);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void insertProduct() {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter product name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter product Price: ");
+        double price;
+        while (true) {
+            System.out.print("Enter product Price: ");
+            if (scanner.hasNextDouble()) {
+                price = scanner.nextDouble();
+                if (price < 0) {
+                    System.out.println("Price cannot be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter a number.");
+                scanner.next();
+            }
+        }
+
+        System.out.print("Enter product Quantity: ");
+        int quantity;
+        while (true) {
+            System.out.print("Enter product Quantity: ");
+            if (scanner.hasNextInt()) {
+                quantity = scanner.nextInt();
+                if (quantity < 0) {
+                    System.out.println("Quantity can not be negative");
+                    continue;
+                }
+                break;
+            } else {
+                System.out.println("Please enter an integer.");
+                scanner.next();
+            }
+        }
+
+        Date date = new Date();
+
+        Product product = new Product(name, price, quantity, date);
+
+        unsaveInsertProduct(product);
+        showUnsavedProducts();
+    }
+
+    @Override
+    public void saveInsertProduct() {
+        if (products.isEmpty()) {
+            System.out.println("No products to save.");
+            return;
+        }
+
+        String sql = "INSERT INTO tb_product(name, unit_price, stock_qty, import_date) VALUES (?, ?, ?, ?)";
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            for (Product product : products) {
+
+                ps.setString(1, product.getName());
+                ps.setDouble(2, product.getPrice());
+                ps.setInt(3, product.getQty());
+                ps.setDate(4, new java.sql.Date(product.getDate().getTime()));
+
+                ps.executeUpdate();
+            }
+
+            products.clear();
+            System.out.println("Save successful!");
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void readProductById() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Product ID: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        try (Connection connection = dbCon.dataSource().getConnection()) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM tb_product WHERE id = " + id);
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+            table.addCell("ID", text);
+            table.addCell("Name", text);
+            table.addCell("Price", text);
+            table.addCell("Quantity", text);
+            table.addCell("Import Date", text);
+
+            while (resultSet.next()) {
+                table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                table.addCell(resultSet.getString("name"), text);
+                table.addCell(String.valueOf(resultSet.getString("unit_price")), text);
+                table.addCell(String.valueOf(resultSet.getString("stock_qty")), text);
+                table.addCell(String.valueOf(resultSet.getString("import_date")), text);
+            }
+            System.out.println(table.render());
+            System.out.printf("Press Enter to continue...");
+            sc.nextLine();
+            showAllProducts();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

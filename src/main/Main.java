@@ -6,44 +6,47 @@ import main.service.ProductImpl;
 import java.io.File;
 import java.util.Scanner;
 
-import static main.service.ProductImpl.*;
-import static main.service.Validate.onlyDigit;
-import static main.service.Validate.yesOrNo;
+
+import static main.service.Validate.*;
+import main.service.ProductImpl.*;
+
+
 
 public class Main {
+
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RED = "\u001B[31m";
 
     public static void main(String[] args) {
-        getRow();
-        getTotal();
+        ProductImpl proImpl = new ProductImpl();
+        proImpl.getRow();
+        proImpl.getTotal();
 
 
         boolean isValid = false;
         System.out.println("\t\t\t\t\t------------ Menu ------------");
         String option;
         Scanner sc = new Scanner(System.in);
-        ProductImpl.showAllProducts();
+        proImpl.showAllProducts();
         while (!isValid) {
             System.out.print("Enter Your Choice : ");
             option = sc.nextLine().trim().toUpperCase();
 
             switch (option) {
 
-                case "N" -> nextPage();
-                case "P" -> previousPage();
-                case "F" -> firstPage();
-                case "L" -> laterPage();
-                case "G" -> goTo(onlyDigit("page Number"));
-
-                case "W" -> System.out.println("Write");
-                case "R" -> System.out.println("Read");
+                case "N" -> proImpl.nextPage();
+                case "P" -> proImpl.previousPage();
+                case "F" -> proImpl.firstPage();
+                case "L" -> proImpl.laterPage();
+                case "G" -> proImpl.goTo(onlyDigit("page Number"));
+                case "W" -> proImpl.insertProduct();
+                case "R" -> proImpl.getProductById();
                 case "U" -> System.out.println("Update");
-                case "D" -> ProductImpl.deleteProduct();
-                case "S" -> System.out.println("Search (Name)");
-                case "SE" -> setRow(onlyDigit("Row Number"));
-                case "SA" -> System.out.println("Save");
+                case "D" -> proImpl.deleteProduct();
+                case "S" -> proImpl.searchProductByName();
+                case "SE" -> proImpl.setRow(onlyDigit("Row Number"));
+                case "SA" -> proImpl.saveAndUpdateProductToDb();
 
                 case "BA" -> {
                     boolean success = BackupData.backup();
@@ -54,7 +57,7 @@ public class Main {
                     } else {
                         System.err.println(ANSI_RED + "Backup failed!" + ANSI_RESET);
                     }
-                    firstPage();
+                    proImpl.firstPage();
                 }
 
                 case "RE" -> {
@@ -92,7 +95,7 @@ public class Main {
                             System.out.println(ANSI_RED + "Restore failed!" + ANSI_RESET);
                         }
                     }
-                    firstPage();
+                    proImpl.firstPage();
                 }
 
                 case "E" -> {
@@ -100,9 +103,7 @@ public class Main {
                         System.out.println("SYSTEM Exit.......!");
                         isValid = true;
                     }
-                    getRow();
-                    getTotal();
-                    showAllProducts();
+                    proImpl.firstPage();
 
                 }
 
@@ -110,4 +111,6 @@ public class Main {
             }
         }
     }
+
+
 }

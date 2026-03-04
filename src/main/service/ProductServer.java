@@ -26,4 +26,6 @@ interface ProductServer {
     void unsaveInsertProduct(Product product);
 
     void showUnsavedProducts();
+
+    void getProductById();
 }

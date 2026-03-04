@@ -124,7 +124,6 @@ public class ProductImpl implements ProductServer{
         } catch (Exception e) {
             e.getMessage();
         }
-
     }
 
     @Override
@@ -502,6 +501,61 @@ public class ProductImpl implements ProductServer{
     }
 
     @Override
+    public void getProductById() {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter product id: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+
+        String sql = "SELECT * FROM tb_product WHERE id = ?";
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet resultSet = ps.executeQuery();
+
+            CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+            Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+            table.setColumnWidth(0, 18, 30);
+            table.setColumnWidth(1, 18, 30);
+            table.setColumnWidth(2, 18, 30);
+            table.setColumnWidth(3, 18, 30);
+            table.setColumnWidth(4, 18, 30);
+
+            table.addCell("ID", text);
+            table.addCell("Name", text);
+            table.addCell("Price", text);
+            table.addCell("Quantity", text);
+            table.addCell("Import Date", text);
+
+            boolean found = false;
+
+            while (resultSet.next()) {
+                found = true;
+
+                table.addCell(String.valueOf(resultSet.getInt("id")), text);
+                table.addCell(resultSet.getString("name"), text);
+                table.addCell(String.valueOf(resultSet.getDouble("unit_price")), text);
+                table.addCell(String.valueOf(resultSet.getInt("stock_qty")), text);
+                table.addCell(String.valueOf(resultSet.getDate("import_date")), text);
+            }
+
+            if (found) {
+                System.out.println(table.render());
+            } else {
+                System.out.println("Product not found with id: " + id);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void insertProduct() {
 
         Scanner scanner = new Scanner(System.in);
@@ -616,8 +670,5 @@ public class ProductImpl implements ProductServer{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
     }
 }

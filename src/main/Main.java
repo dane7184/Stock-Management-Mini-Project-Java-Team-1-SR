@@ -34,7 +34,7 @@ public class Main {
                 case "L" -> proImlp.laterPage();
                 case "G" -> proImlp.goTo(onlyDigit("page Number"));
                 case "W" -> System.out.println("Write");
-                case "R" -> proImlp.readProductById();
+                case "R" -> proImlp.getProductById();
                 case "U" -> System.out.println("Update");
                 case "D" -> proImlp.deleteProduct();
                 case "S" -> proImlp.searchProductByName();

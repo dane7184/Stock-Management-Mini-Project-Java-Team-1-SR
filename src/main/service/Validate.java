@@ -13,6 +13,7 @@ import static main.lib.Color.*;
 
 public class Validate {
     static Scanner sc = new Scanner(System.in);
+
     public static void table(String content) {
         CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
         org.nocrala.tools.texttablefmt.Table t = new org.nocrala.tools.texttablefmt.Table(1, BorderStyle.UNICODE_ROUND_BOX, ShownBorders.ALL);
@@ -106,7 +107,7 @@ public class Validate {
             System.out.print(C_GREEN + "Enter " + reason + " : " + C_RESET);
             String Digit = sc.nextLine();
 
-            if (Pattern.matches("[1-9]{1}[0-9]+", Digit)) {
+            if (Pattern.matches("[1-9][0-9]*", Digit)) {
                 return Double.parseDouble(Digit);
 
             } else if (Pattern.matches("[1-9]{1}[0-9]+.{1}[0-9]{1,2}", Digit)) {

@@ -26,4 +26,12 @@ interface ProductServer {
     void unsaveInsertProduct(Product product);
 
     void showUnsavedProducts();
+
+    void updateProduct();
+
+    void showUnsaveUpdate();
+
+    void unsaveUpdateProduct(Product product);
+
+    void saveUpdateProduct();
 }

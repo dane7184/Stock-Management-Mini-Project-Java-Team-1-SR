@@ -9,14 +9,12 @@ import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import static main.Main.ANSI_GREEN;
 import static main.Main.ANSI_RESET;
-import static main.lib.Color.C_RED;
-import static main.lib.Color.C_RESET;
+import static main.lib.Color.*;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,6 +36,7 @@ public class ProductImpl implements ProductServer{
     static int id = 0;
 
     private static DbConnection dbCon = new DbConnection();
+    static Map<Integer, Product> unsaveUpdate = new HashMap<>();
     List<Product> products = new ArrayList<>();
 
     @Override
@@ -319,7 +318,7 @@ public class ProductImpl implements ProductServer{
             }
 
             if ( !productId.contains(searchId)){
-                System.out.println(Color.C_RED + "No Record Was Found With Id : " + searchId + Color.C_RESET);
+                System.out.println(C_RED + "No Record Was Found With Id : " + searchId + C_RESET);
             }else {
                 System.out.println(table.render());
                 boolean deleted = true;
@@ -563,7 +562,7 @@ public class ProductImpl implements ProductServer{
                 }
 
                 case "UU" -> {
-                    System.out.println("Update feature coming soon...");
+                    saveUpdateProduct();
                 }
 
                 case "E" -> {
@@ -573,6 +572,177 @@ public class ProductImpl implements ProductServer{
 
                 default -> System.out.println("Invalid option!");
             }
+        }
+    }
+
+    @Override
+    public void updateProduct() {
+        Scanner scanner = new Scanner(System.in);
+        String query = "SELECT * FROM tb_product WHERE id = ?";
+        int updateId = Validate.onlyDigit("ID to update");
+        Product productToUpdate = null;
+
+        if (unsaveUpdate.containsKey(updateId)){
+            System.out.println(C_GREEN + "ID already exists in unsave update. Wanna re-update?" + C_RESET);
+            boolean isNo = Validate.yesOrNo();
+            if (!isNo) {
+                return;
+            }
+            productToUpdate = unsaveUpdate.get(updateId);
+
+        } else {
+            try (Connection connection = dbCon.dataSource().getConnection(); PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setInt(1, updateId);
+                ResultSet resultSet = ps.executeQuery();
+
+                    if (!resultSet.next()) {
+                        System.out.println(C_RED + "No Record Was Found With Id: " + updateId + C_RESET);
+                        return;
+                    }
+
+                productToUpdate = new Product(
+                        updateId,
+                        resultSet.getString("name"),
+                        resultSet.getDouble("unit_price"),
+                        resultSet.getInt("stock_qty"),
+                        resultSet.getDate("import_date")
+                );
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+        Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+        table.setColumnWidth(0, 18, 30);
+        table.setColumnWidth(1, 18, 30);
+        table.setColumnWidth(2, 18, 30);
+        table.setColumnWidth(3, 18, 30);
+        table.setColumnWidth(4, 18, 30);
+        table.addCell("ID",text);
+        table.addCell("Name",text);
+        table.addCell("Price",text);
+        table.addCell("Quantity",text);
+        table.addCell("Import Date",text);
+
+        table.addCell(String.valueOf(updateId),text);
+        table.addCell(productToUpdate.getName(),text);
+        table.addCell(String.valueOf(productToUpdate.getPrice()),text);
+        table.addCell(String.valueOf(productToUpdate.getQty()),text);
+        table.addCell(String.valueOf(productToUpdate.getDate()),text);
+        System.out.println(table.render());
+
+        boolean isRunning = true;
+        do {
+            System.out.printf("%-5s %15s %10s %15s %10s", "1. Name", "2. Unit Price", "3. Qty", "4. All field", "5. Exit\n");
+            System.out.print("Choose an option to update: ");
+            String userChoice = scanner.nextLine();
+            switch (userChoice){
+                case "1" -> {
+                    System.out.print("Enter new product name: ");
+                    productToUpdate.setName(scanner.nextLine());
+                    System.out.println(Color.C_GREEN + "Updated successfully!" + C_RESET);
+                }
+                case "2" -> {
+                    productToUpdate.setPrice(Validate.onlyDouble("new product price"));
+                    System.out.println(Color.C_GREEN + "Updated successfully!" + C_RESET);
+                }
+                case "3" -> {
+                    productToUpdate.setQty(Validate.qty("new product quantity"));
+                    System.out.println(Color.C_GREEN + "Updated successfully!" + C_RESET);
+                }
+                case "4" -> {
+                    System.out.print("Enter new product name: ");
+                    productToUpdate.setName(scanner.nextLine());
+                    productToUpdate.setPrice(Validate.onlyDouble("new product price"));
+                    productToUpdate.setQty(Validate.qty("new product quantity"));
+                    System.out.println(Color.C_GREEN + "Updated successfully!" + C_RESET);
+                }
+                case "5" -> {
+                    isRunning = false;
+                    unsaveUpdateProduct(productToUpdate);
+                }
+                default -> System.out.println(C_RED + "Invalid Input! Please Choose Between 1 - 5" + C_RESET);
+            }
+        }while (isRunning);
+        System.out.print("Press to continue....");
+        scanner.nextLine();
+
+        firstPage();
+    }
+
+    @Override
+    public void showUnsaveUpdate() {
+
+        if (unsaveUpdate.isEmpty()){
+            System.out.println("No unsaved products.");
+            return;
+        }
+
+        CellStyle text = new CellStyle(CellStyle.HorizontalAlign.center);
+        Table table = new Table(5, BorderStyle.UNICODE_BOX, ShownBorders.ALL);
+
+        table.setColumnWidth(0, 18, 30);
+        table.setColumnWidth(1, 18, 30);
+        table.setColumnWidth(2, 18, 30);
+        table.setColumnWidth(3, 18, 30);
+        table.setColumnWidth(4, 18, 30);
+
+        table.addCell("ID",text);
+        table.addCell("Name",text);
+        table.addCell("Price",text);
+        table.addCell("Quantity",text);
+        table.addCell("Import Date",text);
+
+        for (Product product : unsaveUpdate.values()) {
+            table.addCell(String.valueOf(product.getId()),text);
+            table.addCell(product.getName(),text);
+            table.addCell(String.valueOf(product.getPrice()),text);
+            table.addCell(String.valueOf(product.getQty()),text);
+            table.addCell(String.valueOf(product.getDate()),text);
+        }
+
+        System.out.println(table.render());
+    }
+
+    @Override
+    public void unsaveUpdateProduct(Product product) {
+        unsaveUpdate.put(product.getId(), product);
+        System.out.println("unsave update product");
+    }
+
+    @Override
+    public void saveUpdateProduct() {
+        if (unsaveUpdate.isEmpty()) {
+            System.out.println("No products to save.");
+            return;
+        }
+
+        String sql = "UPDATE tb_product SET name = ?, unit_price = ?, stock_qty = ?, import_date = ? WHERE id = ?";
+
+        try (Connection connection = dbCon.dataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            for (Product product : unsaveUpdate.values()) {
+                ps.setString(1, product.getName());
+                ps.setDouble(2, product.getPrice());
+                ps.setInt(3, product.getQty());
+
+                if (product.getDate() != null) {
+                    ps.setDate(4, new java.sql.Date(product.getDate().getTime()));
+                } else {
+                    ps.setNull(4, java.sql.Types.DATE);
+                }
+                ps.setInt(5, product.getId());
+
+                ps.executeUpdate();
+            }
+
+            unsaveUpdate.clear();
+            System.out.println("Save successful!");
+
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

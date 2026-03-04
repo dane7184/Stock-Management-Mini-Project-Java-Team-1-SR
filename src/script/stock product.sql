@@ -21,4 +21,3 @@ VALUES ('Computer', 350, 4),
 create table if not exists tb_set_row (row int);
 insert into tb_set_row values (1);
 
-TRUNCATE TABLE tb_product RESTART IDENTITY;
